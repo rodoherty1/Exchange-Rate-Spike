@@ -24,6 +24,6 @@ Todo
 * Add a menu to allow the user to select a different currency
 * Add a refresh all currencies button
 * Write the D3 code which will displays the chart for the last 90 days
-
+* Is there an elegant way to bind Cassandra rows with the source code (e.g. like the SpringData project for MongoDB) 
 
 

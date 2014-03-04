@@ -6,7 +6,7 @@ This is a simple spike of a web app that will display the last 90 days of curren
 * The browser will display the data using the D3 library.
 * The data will be retrieved from http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml
 * The data will be stored in Cassandra
-* The webb app will be written using The Play Framework.
+* The web app will be written using The Play Framework.
 
 
 Todo

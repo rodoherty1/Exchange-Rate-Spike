@@ -15,7 +15,7 @@ Todo
 * Create basic web app
 * Display in the browser either a static page, or a template page.
 * Design column-store table
-* Install Cassandra and install table
+* Install Cassandra 1.1.12 and install table
 * Insert some dummy data to query against
 * Find the best URL to use to query exchange rate data of all currencies
 * Write exchange results into DB table.

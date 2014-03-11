@@ -32,28 +32,49 @@ import play.libs.WS.HttpResponse;
 
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 
+/*
+ * This is the model for the Web App.
+ * 
+ * This model also captures communication with the Data Access Layer.  This is facilitated by the ExchangeRateDAO.
+ * 
+ */
 public class ExchangeRate extends Model {
     public static final int HISTORY_SIZE = 90;
+	private static final int NUMBER_OF_THREADS = 10;
 
     private static final String URL_EXCHANGE_RATE_HISTORY = "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.xml";
 
     private static final SimpleDateFormat sdfYearMonthDate = new SimpleDateFormat("yyyy-M-dd");
-    private static final SimpleDateFormat sdfMonthDate = new SimpleDateFormat("MMM-dd");
 
-	private static final int NUMBER_OF_THREADS = 10;
-    
+    /*
+     * Interface into the DAL
+     */
 	public static ExchangeRateDAO dao;
     
+	/*
+	 * Each ExchangeRate object has a Currency
+	 */
     public String currency;
     
+    /*
+     * Each ExchangeRate object has a collection of Exchange Rates for the past 90 days. 
+     */
     public Map<Long, Float> rates = new HashMap<Long, Float>(HISTORY_SIZE);
 
+    /*
+     * Thread Pool which is used to asynchronously contact the ECB's website and the Data Access Layer (DAL) 
+     */
     private static final ExecutorService executor = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
+
     
     public ExchangeRate(String currency) {
     	this.currency = currency;
 	}
 
+    
+    /**
+     * Public interface used to get an ExchangeRate for a specified currency
+     */
 	public static Future<ExchangeRate> get(final String currency) {
 		return executor.submit(new Callable() {
 			@Override
@@ -74,6 +95,9 @@ public class ExchangeRate extends Model {
     }
     
 
+    /**
+     * Public interface used to refresh ExchangeRate data from the ECB's website for a specified currency
+     */
 	public static Future<?> refresh(final String currency) {
 		return executor.submit(new Runnable() {
 			@Override
@@ -87,7 +111,9 @@ public class ExchangeRate extends Model {
 		});
     }
 
-    
+    /**
+     * Public interface used to refresh all ExchangeRate data from the ECB's website
+     */
     public static Future<?> refreshAll() {
 		return executor.submit(new Runnable() {
 			@Override
@@ -101,6 +127,9 @@ public class ExchangeRate extends Model {
 		});
     }
 
+    /*
+     * Retrieve the latest ExchangeRate XML doc from the ECB's website
+     */
 	private static HttpResponse getLatestCurrencyRatesFromECB() {
 		final F.Promise<WS.HttpResponse> history = WS.url(URL_EXCHANGE_RATE_HISTORY).getAsync();
 		
@@ -115,6 +144,9 @@ public class ExchangeRate extends Model {
 	}
 
 	
+    /*
+     * Read a list of currencies that are stored in the DB
+     */
 	public static Future<String[]> getCurrencies() {
 		return executor.submit(new Callable() {
 			@Override
@@ -133,7 +165,9 @@ public class ExchangeRate extends Model {
 		return createExchangeRates(null, xmlDoc);
 	}
 
-	
+	/*
+	 * Parse the ECB's XML doc and retrieve the last 90 days of Exchange Rates  
+	 */
 	private static Collection<ExchangeRate> createExchangeRates(String userSelection, Document xmlDoc) {
 		final Map<String, ExchangeRate> ret = new HashMap<String, ExchangeRate>();
 
@@ -162,7 +196,7 @@ public class ExchangeRate extends Model {
 
 
 	/*
-	 * 
+	 * Convenience method used during the parsing of the ECB's XML document.
 	 */
 	private static void addtoMap(Map<String, ExchangeRate> map, Long date, String currency, Float rate) {
 		ExchangeRate e = map.get(currency);
@@ -176,6 +210,9 @@ public class ExchangeRate extends Model {
 	}
 
 	
+	/**
+	 * Add a new rate along with its corresponding date to this ExchangeRate object.  
+	 */
     public void addRate(Long date, Float rate) {
     	if ((date != null) && (rate != null)) {
     		this.rates.put(date, rate);
@@ -192,7 +229,10 @@ public class ExchangeRate extends Model {
 		}
 	}
 
-	
+	/**
+	 * Rates must be sorted by date before they are returned to the Web layer as a response.
+	 * This ensures that the data visualisation makes sense!
+	 */
 	public final Set<Long> getSortedDates() {
 		final Set<Long> ret = new TreeSet<Long> (new Comparator<Long>() {
 			@Override
@@ -210,12 +250,4 @@ public class ExchangeRate extends Model {
     private boolean hasNoData() {
 		return this.rates.isEmpty();
 	}
-
-    
-	public final String asString(long epoch) {
-		return sdfMonthDate.format(new Date(epoch));
-	}
-
-	
-
 }

@@ -42,8 +42,43 @@ var margin = {
         "left": 70
 }
 
+/*
+ * Draw the chart for the specified data.
+ * The data is a JSON object of the following form:
+ *	 
+ * { 
+ *     dates : [epoch1, epoch2, epoch3],
+ *     rates : [1.23, 1.25, 1.27] 
+ * }
+ */
 function draw(data) {
+	/*
+	 * Find the earliest date in the Date Range
+	 */
+	var floor = d3.time.day.floor(
+					d3.min(data.dates, function (d) {
+						return new Date(d);
+					}));
+	
+	/*
+	 * Find the latest date in the Date Range
+	 */
+	var ceil = d3.time.day.ceil(
+					d3.max(data.dates, function (d) {
+						return new Date(d);
+					}));
+	
+	/*
+	 * Use the earliest and latest dates to establish the Time Scale for xAxis of the chart
+	 */
+	var x = d3.time.scale()
+			.domain([floor, ceil])
+			.rangeRound([0, width]);
+	
 
+	/*
+	 * Setting up the Y-Axis scale of the exchange-rate values.
+	 */
 	function getMinAndMax() {
 		var minRateRange = d3.min(data.rates) - ((d3.max(data.rates) - d3.min(data.rates)) * .1);
 		var maxRateRange = d3.max(data.rates);
@@ -55,26 +90,19 @@ function draw(data) {
 		}
 	}
 	
-	var floor = d3.time.day.floor(
-					d3.min(data.dates, function (d) {
-						return new Date(d);
-					}));
-	var ceil = d3.time.day.ceil(
-					d3.max(data.dates, function (d) {
-						return new Date(d);
-					}));
-	
-	var x = d3.time.scale()
-			.domain([floor, ceil])
-			.rangeRound([0, width]);
-	
 	minAndMaxRanges = getMinAndMax(data.rates);
 	
+	/*
+	 * Setting up the Y-Axis scale of the exchange-rate values.
+	 */
 	var y = d3.scale.linear()
 			.domain([minAndMaxRanges[0], minAndMaxRanges[1]])
 			.range([height, 0]);
 				
-
+	
+	/*
+	 * Describe the xAxis which displays the Dates of the ExchangeRates 
+	 */
 	var xAxis = d3.svg.axis()
 					.scale(x)
 					.orient('bottom')
@@ -82,8 +110,14 @@ function draw(data) {
 					.tickFormat(d3.time.format('%b-%d'));
 	
 	
+	/*
+	 * Describe the xAxis which displays the Exchange Rate values 
+	 */
 	var yAxis = d3.svg.axis().scale(y).orient("left");
 	
+	/*
+	 * Create the Chart container and move it into position 
+	 */
 	var svgContainer = d3.select('.chart')
 					.append('svg')
 					.attr('width', width + margin.left + margin.right)
@@ -92,6 +126,9 @@ function draw(data) {
 				    .attr("transform", "translate(" + margin.left + "," + margin.right + ")");
 	
 	
+	/*
+	 * Draw the yAxis and add a label for the Currency Rate 
+	 */
 	svgContainer.append("g")
 				.attr("class", "yAxis")
 				.call(yAxis)
@@ -104,6 +141,9 @@ function draw(data) {
 				.text("Currency Rate");
 	        
 	        
+	/*
+	 * Draw the xAxis and rotate the tick labels so that they don't overwrite each other 
+	 */
 	svgContainer.append("g")
 				.attr("class", "xAxis")
 				.attr("transform", "translate( 0," + height + ")")
@@ -116,7 +156,9 @@ function draw(data) {
 	                return "rotate(-65)" 
 	                });
 	
-	
+	/*
+	 * Draw the bars that comprise the actual ExchangeRate data 
+	 */
 	svgContainer.selectAll(".bar")
 				.data(data.rates)
 				.enter()
@@ -138,6 +180,9 @@ function draw(data) {
 }
 
 
+/*
+ * Convenience method used to invoke a HTTP Request to read a new exchange rate from the server   
+ */
 function selectCurrency(newSelection) {
 	var currencies = $('.currency');
 	var parent = $($(currencies[0])[0]).parent()[0]; // Shoudln't this be easier?
@@ -152,8 +197,11 @@ function selectCurrency(newSelection) {
 }
 
 
-
+/*
+ * Wire up the UI components that will kick of HTTP Requests on the user's behalf.    
+ */
 function listenForEvents() {
+
 	/*
 	 * Refresh selected currency
 	 */
@@ -204,7 +252,9 @@ function listenForEvents() {
 	});
 }
 
-
+/*
+ * Wire up the UI and then select a currency to get things started!
+ */
 $( document ).ready(function() {
 	listenForEvents();
 	selectCurrency('USD');

@@ -3,36 +3,47 @@ Exchange-Rate-Spike
 
 This is a simple spike of a web app that will display the last 90 days of currency exchange rates in the browser.
 
-* The browser will display the data using the D3 library.
-* The data will be retrieved from http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml
-* The data will be stored in Cassandra
-* The web app will be written using The Play Framework.
+Functional Overview
+===================
+
+Write a non-blocking Java web application which will consume a rolling window of the last 90 days of exchange rate data from a third-party API. 
+
+This data from the third-party is required to be stored in the database (Cassandra & Astyanax Client) to avoid unnecessary network calls to the third-party API.
+
+There will be a UI component which will allow the end-user to select an available exchange rate to visualise its performance.
+
+- the retrieval of the rates should be implemented in a non-blocking fashion against the database.
+- if the database does not contain the data then a lazy load is performed against the third-party API in a non-blocking fashion to populate the database.
+- database & third-party API stampedes should be avoided when lazy loading the data from the third-party API.
+- the exchange rates will be available via a REST call.
+- a selected exchange rate will be rendered to an end-user via a time-based graph visualisation.
+
+User Story
+==========
+The web application is running
+
+- The end-user browsers the application URL.
+- The end-user is presented with a visualisation containing the EUR-USD data points plotted for the last 90 days.
+- The end-user can select other rates of exchange from a menu displaying the available conversions.
+- The end-user can force a real-time non-blocking refresh of the currently selected exchange rate.
+- The end-user can force a real-time refresh of all exchange rates concurrently.
+
+Resources
+==========
+Please use the following platform/libraries
+- Playframework version 1.2.5 - Java Web Application - http://www.playframework.org/
+- AJAX/JQuery - http://jquery.com/
+- D3 - Javascript Visualisation Engine - http://d3js.org/
+- Exchange Rate API - http://www.ecb.int/stats/exchange/eurofxref/html/index.en.html
+- Cassandra 1.1.12 - http://cassandra.apache.org
+- Astyanax 1.56.26 - https://github.com/Netflix/astyanax
+
+Ensure that 
+===========
+- The code is formatted
+- The code has appropriate Javadoc and comments.
+- Include the Cassandra.ddl for population of the Cassandra Keyspace and ColumnFamilies
 
 
-Todo
-====
-
-* Create basic web app
-* Display in the browser either a static page, or a template page.
-* Install Cassandra 1.1.12
-* Install Astyanax 1.56.26
-
-* Design column-store table
-* Install table
-* Insert some dummy data to query against
-* Define Domain Model
-* Connect the browser to the datasource
-* Get a proof-of-concept of Astyanax
-* Get a simple round-trip from the browser to the db
-* Spec out the REST interface
-* Find the best URL to use to query exchange rate data of all currencies
-
-* Write exchange results into DB table.
-* I need to stream the results back to the browser
-* Add a menu to allow the user to select a different currency
-* Add a refresh all currencies button
-* Write the D3 code which will displays the chart for the last 90 days
-* Align the D3 table with the table schema
-* Is there an elegant way to bind Cassandra rows with the source code (e.g. like the SpringData project for MongoDB) 
 
 

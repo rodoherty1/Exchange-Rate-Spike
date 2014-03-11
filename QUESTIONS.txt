@@ -1,2 +1,0 @@
-Should the fields in the ExchangeRate model be public or static or private or what?  What does Play recommend?
-

@@ -1,0 +1,17 @@
+
+The Table schema was designed as follows:
+
+The RowKey is a Long and captures the date on which the ExchangeRates were recorded.
+There is one ColumnFamily which will store an unknown quantity of Columns.  Each column is named after the currency that it represents (e.g. AUD, USD).
+
+The exchange rate for a given currency is stored under the Column that represents the Currency.
+
+For example
+===========
+
+RowKey                 AUD       USD      GBP
+1387497600000         1.24      1.27     0.74
+
+As new currencies come into existence, a new column is added to the ColumnFamily.
+
+

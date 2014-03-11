@@ -3,13 +3,17 @@
 # ~~~~
 
 # Home page
-GET     /                                       Exchange.get
+GET     /                                           ExchangeRates.home
+GET     /currency/{<[A-Z]{3}>currency}/get          ExchangeRates.get
+GET     /currency/{<[A-Z]{3}>currency}/refresh      ExchangeRates.refresh 
+GET     /currency/refreshAll                        ExchangeRates.refreshAll
+
 
 # Ignore favicon requests
-GET     /favicon.ico                            404
+GET     /favicon.ico                                404
 
 # Map static resources from the /app/public folder to the /public path
-GET     /public/                                staticDir:public
+GET     /public/                                    staticDir:public
 
 # Catch all
-*       /{controller}/{action}                  {controller}.{action}
+*       /{controller}/{action}                      {controller}.{action}

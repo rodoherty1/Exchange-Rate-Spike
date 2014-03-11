@@ -5,41 +5,16 @@
         <title>#{get 'title' /}</title>
         <meta charset="${_response_encoding}">
         <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/main.css'}">
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+        
         #{get 'moreStyles' /}
         <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
         
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-		<script src="http://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.9/require.min.js"></script> 	
-		<script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.3.3/d3.min.js"></script>
+		<script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.4.2/d3.min.js"></script>
+		<script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
         
         #{get 'moreScripts' /}
-
-		<script type="text/javascript">
-			'use strict';
-		    $(function () {
-	
-		        requirejs.config({
-		            "baseUrl": "@{'/public/javascripts'}",
-		            "paths": {
-		                "app": "@{'/public/javascripts'}",
-		                'moment': 'http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.2.1/moment.min',
-		                'underscore': 'http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min'		                
-		            }
-		        });
-	
-	
-		        require(['app/d3.chart'], function (d3Chart) {
-		            d3Chart.init({ container: '#container', xDim: 'DateTime' });
-					d3Chart.addGraph({ id: 'CTR', type: 'analog', name: 'CTR', dataId: 513, yVal: ['Value'], data: CTR });
-					d3Chart.render();		            		           
-	
-		            setTimeout(function () {	
-		                d3Chart.reorderGraph('Accel', 'up');
-		            }, 3000);
-		        });
-	
-		    });
-		</script>
     </head>
     <body>
         #{doLayout /}

@@ -76,5 +76,9 @@
 			<attribute name="javadoc_location" value="jar:file:/home/rob/tools/Cassandra/astyanax/build/libs/astyanax-1.56.26-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/home/rob/tools/Cassandra/apache-cassandra-1.1.12/lib/apache-cassandra-1.1.12.jar"/>
+	<classpathentry kind="lib" path="/home/rob/tools/Cassandra/apache-cassandra-1.1.12/lib/apache-cassandra-clientutil-1.1.12.jar"/>
+	<classpathentry kind="lib" path="/home/rob/tools/Cassandra/apache-cassandra-1.1.12/lib/apache-cassandra-thrift-1.1.12.jar"/>
+	<classpathentry kind="lib" path="lib/guava-10.0.1.jar"/>
 	<classpathentry kind="output" path="eclipse/classes"/>
 </classpath>

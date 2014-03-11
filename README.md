@@ -20,17 +20,19 @@ Todo
 * Design column-store table
 * Install table
 * Insert some dummy data to query against
-* Align the D3 table with the table schema
-* Get a simple round-trip from the browser to the db
-
-* Find the best URL to use to query exchange rate data of all currencies
-* Write exchange results into DB table.
-* Spec out the REST interface
+* Define Domain Model
 * Connect the browser to the datasource
+* Get a proof-of-concept of Astyanax
+* Get a simple round-trip from the browser to the db
+* Spec out the REST interface
+* Find the best URL to use to query exchange rate data of all currencies
 
+* Write exchange results into DB table.
+* I need to stream the results back to the browser
 * Add a menu to allow the user to select a different currency
 * Add a refresh all currencies button
 * Write the D3 code which will displays the chart for the last 90 days
+* Align the D3 table with the table schema
 * Is there an elegant way to bind Cassandra rows with the source code (e.g. like the SpringData project for MongoDB) 
 
 

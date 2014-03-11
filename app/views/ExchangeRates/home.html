@@ -1,0 +1,213 @@
+#{extends 'main.html' /}
+#{set title:'home.html' /}
+
+<div id="container" style="min-width: 300px;width:100%">
+	<div class="row">
+		<div class="panel panel-primary">
+			<div class="panel-heading">
+				<h2 align="center" class="panel-title">Exchange Rates to €1</h2>
+			</div>
+			
+			<div class="panel-body">
+				<div class="btn-group col-md-2" >
+  					<button id="refresh-selected" type="button" class="btn btn-default">Refresh Selected Currency </button>
+  					<button id="refresh-all-currencies" type="button" class="btn btn-default">Refresh All Currencies</button>
+				</div>
+		 		<div id='chartContainer' class="col-md-6">
+					<div class="chart"></div>
+					<div class="jumbotron">
+						<h2>Getting Rates from ECB ... </h2>
+					</div>
+				</div>
+		 		<div id="all-currencies" class="col-md-2">
+					<div class="list-group currencies">
+		       			#{list currencies, as: 'currency'}
+		            		<a href="#" class="list-group-item currency">${currency}</a>
+						#{/list}            
+					</div>
+				</div>
+			</div>
+		</div>	
+	</div>
+</div>
+    		
+<script>
+var width = 500;
+var height = 200;
+var barPadding = 1;
+var margin = {
+        "top": 10,
+        "right": 10,
+        "bottom": 100,
+        "left": 70
+}
+
+function draw(data) {
+
+	function getMinAndMax() {
+		var minRateRange = d3.min(data.rates) - ((d3.max(data.rates) - d3.min(data.rates)) * .1);
+		var maxRateRange = d3.max(data.rates);
+		
+		if (minRateRange === maxRateRange) {
+			return [minRateRange * 0.9, maxRateRange * 1.1];
+		} else {
+			return [minRateRange, maxRateRange];
+		}
+	}
+	
+	var floor = d3.time.day.floor(
+					d3.min(data.dates, function (d) {
+						return new Date(d);
+					}));
+	var ceil = d3.time.day.ceil(
+					d3.max(data.dates, function (d) {
+						return new Date(d);
+					}));
+	
+	var x = d3.time.scale()
+			.domain([floor, ceil])
+			.rangeRound([0, width]);
+	
+	minAndMaxRanges = getMinAndMax(data.rates);
+	
+	var y = d3.scale.linear()
+			.domain([minAndMaxRanges[0], minAndMaxRanges[1]])
+			.range([height, 0]);
+				
+
+	var xAxis = d3.svg.axis()
+					.scale(x)
+					.orient('bottom')
+					.ticks(20)
+					.tickFormat(d3.time.format('%b-%d'));
+	
+	
+	var yAxis = d3.svg.axis().scale(y).orient("left");
+	
+	var svgContainer = d3.select('.chart')
+					.append('svg')
+					.attr('width', width + margin.left + margin.right)
+					.attr('height', height + margin.top + margin.bottom)
+					.append("g")
+				    .attr("transform", "translate(" + margin.left + "," + margin.right + ")");
+	
+	
+	svgContainer.append("g")
+				.attr("class", "yAxis")
+				.call(yAxis)
+				.append("text")
+				.attr("transform", "rotate(-90)")
+				.attr("y", -65)
+				.attr("x", -50)
+				.attr("dy", ".71em")
+				.style("text-anchor", "end")
+				.text("Currency Rate");
+	        
+	        
+	svgContainer.append("g")
+				.attr("class", "xAxis")
+				.attr("transform", "translate( 0," + height + ")")
+				.call(xAxis)
+				.selectAll("text")  
+	            .style("text-anchor", "end")
+	            .attr("dx", "-.8em")
+	            .attr("dy", ".15em")
+	            .attr("transform", function(d) {
+	                return "rotate(-65)" 
+	                });
+	
+	
+	svgContainer.selectAll(".bar")
+				.data(data.rates)
+				.enter()
+				.append("rect")
+				.attr("class", "bar")
+				.attr('fill', 'green')
+				.attr("x", function(d, i) {
+	    			return ((i / data.rates.length) * width) + barPadding;
+				})
+				.attr("y", function(d) {
+	    			return y(d);
+				})
+				.attr("width", function(){
+					return width / data.rates.length;
+				})
+				.attr("height", function(d) {
+	    			return height -y(d);
+				});
+}
+
+
+function selectCurrency(newSelection) {
+	var currencies = $('.currency');
+	var parent = $($(currencies[0])[0]).parent()[0]; // Shoudln't this be easier?
+	
+	for (var i=0; i<currencies.length; i++) {
+		var currency = $(currencies[i])[0]; 
+		if (currency.text == newSelection) {
+			currency.click();
+			break;
+		}
+	}
+}
+
+
+
+function listenForEvents() {
+	/*
+	 * Refresh selected currency
+	 */
+	$( "#refresh-selected" ).click(function(e) {
+		$('#refresh-selected').text('Refreshing ...');
+		
+		var selectedCurrency = $('.currency.active')[0].text;
+		$.ajax({
+			url: '/currency/' + selectedCurrency + '/refresh',
+		}).done(function(html) {
+			$('#refresh-selected').text('Refresh Selected Currency');
+			listenForEvents();
+			selectCurrency(selectedCurrency);
+		});	
+	});
+
+	/*
+	 * Refresh all currencies
+	 */
+	$( "#refresh-all-currencies" ).click(function(e) {
+		$('#refresh-all-currencies').text('Refreshing ...');
+		$.ajax({
+			url: '/currency/refreshAll',
+			cache: false
+		}).done(function(html) {
+			$('#refresh-all-currencies').text('Refresh All Currencies');
+			var newCurrencies = $(html).find('.currencies');
+			$('#all-currencies').find('.currencies').remove();
+			$('#all-currencies').append(newCurrencies);
+			listenForEvents();
+			selectCurrency('USD');
+		});	
+	});
+
+	/*
+	 * Get Exchange Rates for Selected Currency
+	 */
+	$( ".currency" ).click(function(e) {
+		var previousCurrency = $('.active');
+		$.getJSON( '/currency/' + e.target.text + '/get')
+		.done( function(data) {
+			$('.chart').children().remove();
+			$('.jumbotron').remove();
+			draw(data);
+			$(previousCurrency).removeClass('active');
+			$(e.target).addClass('active');
+		});
+	});
+}
+
+
+$( document ).ready(function() {
+	listenForEvents();
+	selectCurrency('USD');
+});
+	
+</script>

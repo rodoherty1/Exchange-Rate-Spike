@@ -15,3 +15,14 @@ RowKey                 AUD       USD      GBP
 As new currencies come into existence, a new column is added to the ColumnFamily.
 
 
+Sample CQL statements that are employed by the running application
+==================================================================
+ALTER TABLE exchange_rates ADD USD float;
+ALTER TABLE exchange_rates ADD GBP float;
+ALTER TABLE exchange_rates ADD RUB float;
+
+INSERT INTO exchange_rates (date, USD) VALUES (1394305208, 1.27);
+INSERT INTO exchange_rates (date, GBP) VALUES (1394305208, 0.78);
+INSERT INTO exchange_rates (date, RUB) VALUES (1394305208, 123);
+
+

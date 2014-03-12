@@ -2,9 +2,12 @@ package models.dao;
 
 import static models.ExchangeRate.HISTORY_SIZE;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -21,7 +24,6 @@ import com.netflix.astyanax.ddl.ColumnDefinition;
 import com.netflix.astyanax.model.Column;
 import com.netflix.astyanax.model.ColumnFamily;
 import com.netflix.astyanax.model.Row;
-import com.netflix.astyanax.model.Rows;
 import com.netflix.astyanax.serializers.LongSerializer;
 import com.netflix.astyanax.serializers.StringSerializer;
 
@@ -30,6 +32,8 @@ import com.netflix.astyanax.serializers.StringSerializer;
  */
 public class ExchangeRateDAOImpl implements ExchangeRateDAO {
 	
+	private static final String USD = "USD";
+
 	private static final String COLUMN_FAMILY_NAME = "exchange_rates";
 
 	/*
@@ -108,7 +112,7 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
 		final MutationBatch mb = KEYSPACE.prepareMutationBatch();
 		
 		try {
-			final Set<String> knownCurrencies = readKnownCurrencies();
+			final List<String> knownCurrencies = readKnownCurrencies();
 			
 			while (exchangeRates.hasNext()) {
 				final ExchangeRate exchangeRate = exchangeRates.next();
@@ -154,7 +158,7 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
 	/*
 	 * Convenience method to ask the Set of known currencies if it already contains the currency of the specified ExchangeRate
 	 */
-	private static boolean isNewCurrency(final ExchangeRate exchangeRate, final Set<String> knownCurrencies) {
+	private static boolean isNewCurrency(final ExchangeRate exchangeRate, final List<String> knownCurrencies) {
 		return !knownCurrencies.contains(exchangeRate.currency);
 	}
 
@@ -162,14 +166,22 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
 	/**
 	 * Read all Column names from the ColumnFamily.  Each column name represents the name of a Currency.
 	 */
-	public Set<String> readKnownCurrencies() throws ConnectionException {
-		final Set<String> ret = new HashSet<String>();
+	@Override
+	public List<String> readKnownCurrencies() throws ConnectionException {
+		final LinkedList<String> ret = new LinkedList<String>();
+		final Set<String> currencies = new HashSet<String>();
 		
 		final List<ColumnDefinition> defs = KEYSPACE.describeKeyspace().getColumnFamily(COLUMN_FAMILY_NAME).getColumnDefinitionList();
 		
 		for (ColumnDefinition def : defs) {
-			ret.add(def.getName());
+			currencies.add(def.getName());
 		}
+		
+		ret.addAll(currencies);
+		Collections.sort(ret);
+		
+		ret.remove(USD);
+		ret.addFirst(USD);
 		
 		return ret;
 	}

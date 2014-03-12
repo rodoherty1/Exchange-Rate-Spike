@@ -147,15 +147,14 @@ public class ExchangeRate extends Model {
     /*
      * Read a list of currencies that are stored in the DB
      */
-	public static Future<String[]> getCurrencies() {
+	public static Future<List<String>> getCurrencies() {
 		return executor.submit(new Callable() {
 			@Override
-			public String[] call() throws Exception {
+			public List<String> call() throws Exception {
 				try {
-					final Set<String> currencies = dao.readKnownCurrencies();
-					return currencies.toArray(new String[currencies.size()]);
+					return dao.readKnownCurrencies();
 				} catch (ConnectionException e) {
-					return new String[] {"Currencies Unavailable"};
+					throw new IllegalStateException ("Currencies Unavailable : " + e.getMessage(), e);
 				}
 			}
 		});

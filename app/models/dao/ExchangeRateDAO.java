@@ -1,12 +1,11 @@
 package models.dao;
 
 import java.util.Iterator;
-import java.util.Set;
-import java.util.concurrent.Future;
-
-import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
+import java.util.List;
 
 import models.ExchangeRate;
+
+import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 
 public interface ExchangeRateDAO {
 
@@ -14,6 +13,6 @@ public interface ExchangeRateDAO {
 
 	void insert(Iterator<ExchangeRate> iterator);
 
-	Set<String> readKnownCurrencies() throws ConnectionException;
+	List<String> readKnownCurrencies() throws ConnectionException;
 
 }

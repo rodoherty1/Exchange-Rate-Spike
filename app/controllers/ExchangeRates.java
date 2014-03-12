@@ -19,9 +19,7 @@ public class ExchangeRates extends Controller {
 	 * Main entry point into the Web App
 	 */
     public static void home() {
-    	final List<String> currencies = Arrays.asList(await(ExchangeRate.getCurrencies()));
-    	Collections.sort(currencies);
-    	
+    	final List<String> currencies = await(ExchangeRate.getCurrencies());
         render(currencies);
     }
 
